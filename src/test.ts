@@ -1,10 +1,10 @@
 import { WorkerQueue } from "./queue";
-function outTheFetch(result){
-    console.log(result);
-}
 
-let wq = new WorkerQueue();
-wq.push((unused, testing)=>{ return fetch("/index.html")}, (v)=>{}, true,false, "x");
-wq.push((asdf: Response)=>{return asdf.text()}, (v)=>{console.log(v)}, true, true);
+
+let wq = new WorkerQueue("./dist/bundle/worker.bundle.js");
+wq.addVarToWorkerScope("test1", "/");
+let test1;
+wq.push((unused, testing)=>{ return fetch(self["variablesScope"]["test1"])}, (v)=>{}, true,false, "x");
+wq.push((asdf: Response)=>{return asdf.text()}, (v)=>{alert(v)}, true, true);
 // wq.push(outTheFetch, ()=>{}, false);
 wq.flush();

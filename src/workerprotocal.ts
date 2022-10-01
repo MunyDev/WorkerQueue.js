@@ -7,12 +7,14 @@ export type FunctionDescriptor = {
     runCallbackWithValue?: boolean
 }
 export type WorkerProtocalMsg = {
-    type: "push"|"asyncPush"|"flush"
+    type: "push"|"asyncPush"|"flush"|"globalscope"
     func: string,
     args: any[],
     callback: string,
     id: number,
-    runCallbackWithValue?: boolean
+    runCallbackWithValue?: boolean,
+    name?: string,
+    data?: string
 }
 export type ClientSideCallbackMapDescriptor = {
     func: (result)=>any,

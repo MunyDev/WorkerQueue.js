@@ -8,8 +8,10 @@ export{};
 
 
 declare const self: DedicatedWorkerGlobalScope;
+// let variablesScope = {};
 
 let fnArray: FunctionDescriptor[] = [];
+self["variablesScope"] = {};
 // Lets test out recursion first
 let state = 0;
 function runTheCallbackViaDescriptor(cliMatch: ClientSideMatchDescriptor) {
@@ -50,11 +52,15 @@ self.addEventListener('message', (ev: {
 } )=>{
     let msg = ev.data;
     let locked: Function;
-    let locked2: Function;
-    //There is literally no other way
+    let locked2: Function = ()=>{
+
+    };
+    //There is literally no other (quick) way
     // Don't put this as a bug report
+    //Please enable unsafe-eval
     eval("locked = "+ msg.func);
-    eval("locked2 = "+ msg.callback);
+    // eval("locked2 = "+ msg.callback);
+    
     switch (msg.type) {
         case "asyncPush":
             fnArray.push({
@@ -75,6 +81,9 @@ self.addEventListener('message', (ev: {
                 id: msg.id,
                 runCallbackWithValue: msg.runCallbackWithValue
             });
+            break;
+        case "globalscope":
+            self["variablesScope"][msg.name] = msg.data;
             break;
         case "flush":
             flush("Started flushing!");
