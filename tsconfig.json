@@ -1,0 +1,13 @@
+{
+    "include": ["./src/**/*"],
+    "compilerOptions": {
+        "outDir": "dist/tsc",
+        "allowJs": true,
+        "isolatedModules": true,
+        "lib": ["ESNext", "DOM", "WebWorker"],
+        "module": "ES6",
+        "target": "ES6",
+        "skipLibCheck": true
+        
+    }
+}
