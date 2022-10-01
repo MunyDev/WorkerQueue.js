@@ -91,11 +91,16 @@ class WorkerQueue {
     private handleMessage(dat: ClientSideMatchDescriptor) {
         if (dat.type === "callbackFunc"){
             if (dat.id){
-                console.debug("Calling callback function id: "+ dat.id);
+                // console.debug("Calling callback function id: "+ dat.id);
                 this.clientSideMap.shift().func(dat.extra);
             }
         }
     }
+    /**
+     * Two bundles will be generated after the build. Please specify where you put the worker bundle in the workerPath argument. Otherwise the worker queue will not start
+     * @param workerPath The worker path is the built worker bundle path
+     * 
+     */
     constructor(workerPath: string) {
         this.id = 0;
         this.worker = new Worker(workerPath);

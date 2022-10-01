@@ -24,8 +24,8 @@ function flush(v) {
         return;
     }
     let pushed = fnArray.shift();
-    console.log(pushed.func.toString());
-    console.log(pushed.async);
+    // console.log(pushed.func.toString());
+    // console.log(pushed.async);
     
     if (pushed.async){
         pushed.func.apply(undefined, [v,...pushed.args]).then((v)=>{pushed.callback(v);runTheCallbackViaDescriptor({
