@@ -1,6 +1,6 @@
 import { WorkerQueue } from "./queue";
 
-
+window['WorkerQueue'] = WorkerQueue;
 let wq = new WorkerQueue("./dist/bundle/worker.bundle.js");
 wq.addVarToWorkerScope("test1", "/");
 let test1;

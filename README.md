@@ -9,3 +9,5 @@ These variables are a little bit more complicated. To use worker scope variables
 To add worker scope variables, use addVarToWorkerScope  
 ## Why is this important
 This projects allows for more control over worker operations and easily be able to integrate Web Workers into your projects.
+## Demo
+Check test.ts
