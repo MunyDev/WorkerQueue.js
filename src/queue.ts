@@ -76,8 +76,30 @@ class WorkerQueue {
             }
         );
     }
-
-    
+    /**
+     * Version 2 automatically detects whether the function is asynchronous
+     * @param func Function to be called in queue
+     * @param callback THe callback after the function is called
+     * @param parameters The function is called with these parameters
+     * @returns 
+     */
+    pushv2(func: (prevVal, ...args: string[])=>any, callback: (returnVal)=>void,runCallbackWithValue:boolean, ...parameters: any[]){
+        if (this.terminated) return;
+        this.id++;
+        this.clientSideMap.push({
+            func: callback,
+            id: this.id
+            
+        })
+        this.send({
+            type: "push",
+            args: parameters,
+            callback: callback.toString(),
+            id: this.id,
+            runCallbackWithValue: runCallbackWithValue,
+            func: func.toString()
+        })
+    }
     /**
      * Attempts to immediately terminate the last function inserted(doesn't work :() 
      * Probably adding this feature soon

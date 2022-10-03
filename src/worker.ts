@@ -28,7 +28,7 @@ function flush(v) {
     // console.log(pushed.async);
     
     if (pushed.async){
-        pushed.func.apply(undefined, [v,...pushed.args]).then((v)=>{pushed.callback(v);runTheCallbackViaDescriptor({
+        pushed.func.apply(undefined, [v,...pushed.args]).then((v)=>{runTheCallbackViaDescriptor({
             extra: (pushed.runCallbackWithValue) ? v : undefined,
             id: pushed.id,
             type: "callbackFunc"
@@ -46,6 +46,33 @@ function flush(v) {
         
     }
     
+}
+// Automatically detects the async
+function flushv2(val) {
+    if (fnArray.length === 0){
+        state = 0;
+        return;
+    }
+    // console.log(val);
+    let shift = fnArray.shift();
+    let result = shift.func.apply(undefined, [val, ...shift.args]);
+    if (result instanceof Promise) {
+        result.then((value)=>{
+            runTheCallbackViaDescriptor({
+                id: shift.id,
+                extra: (shift.runCallbackWithValue) ? value : undefined,
+                type: "callbackFunc"
+            });
+            flushv2(value);
+        })
+    }else{
+        runTheCallbackViaDescriptor({
+            id: shift.id,
+            extra: (shift.runCallbackWithValue) ? result : undefined,
+            type: "callbackFunc"
+        });
+        flushv2(result);
+    }
 }
 self.addEventListener('message', (ev: {
     data: WorkerProtocalMsg
@@ -86,7 +113,7 @@ self.addEventListener('message', (ev: {
             self["variablesScope"][msg.name] = msg.data;
             break;
         case "flush":
-            flush("Started flushing!");
+            flushv2("Started flushing!");
             break;
         default:
             break;
