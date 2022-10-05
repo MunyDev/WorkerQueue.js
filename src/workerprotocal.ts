@@ -4,6 +4,7 @@ export type FunctionDescriptor = {
     func: Function,
     callback: Function,
     id: number,
+    onerror?: number,
     runCallbackWithValue?: boolean
 }
 export type WorkerProtocalMsg = {
@@ -11,7 +12,9 @@ export type WorkerProtocalMsg = {
     func: string,
     args: any[],
     callback: string,
+    // onerror: number,
     id: number,
+    error:number,
     runCallbackWithValue?: boolean,
     name?: string,
     data?: string
@@ -21,4 +24,4 @@ export type ClientSideCallbackMapDescriptor = {
     id: number
 
 }
-export type ClientSideMatchDescriptor = {type: "callbackFunc", id?: number, extra: any};
+export type ClientSideMessage = {type: "callbackFunc"|"finishedFlush", id?: number, extra: any};

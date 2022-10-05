@@ -1,4 +1,4 @@
-import { ClientSideCallbackMapDescriptor, ClientSideMatchDescriptor, WorkerProtocalMsg } from './workerprotocal'
+import { ClientSideCallbackMapDescriptor, ClientSideMessage, WorkerProtocalMsg } from './workerprotocal'
 
 /**
  * The main class related to the project
@@ -23,6 +23,8 @@ class WorkerQueue {
             func: undefined,
             callback: undefined,
             id:undefined,
+            error: undefined,
+            // onerror: undefined,
             type: "flush"
             
         });
@@ -44,6 +46,8 @@ class WorkerQueue {
             callback: undefined,
             args: undefined,
             func: undefined,
+            error:undefined,
+            // onerror: undefined,
             data: finalData,
             name: varName
         });
@@ -70,7 +74,9 @@ class WorkerQueue {
                 "type": (async) ? "asyncPush": "push",
                 func: func.toString(),
                 args: parameters,
+                error: this.id++,
                 callback: callback.toString(),
+                // onerror: (()=>{}).toString(),
                 id: this.id,
                 runCallbackWithValue: runCallbackWithValue
             }
@@ -83,21 +89,39 @@ class WorkerQueue {
      * @param parameters The function is called with these parameters
      * @returns 
      */
-    pushv2(func: (prevVal, ...args: string[])=>any, callback: (returnVal)=>void,runCallbackWithValue:boolean, ...parameters: any[]){
+    pushv2(func: (prevVal, ...args: string[])=>any, callback: (returnVal)=>void,runCallbackWithValue:boolean,onerror?: (err)=>void, ...parameters: any[]){
         if (this.terminated) return;
         this.id++;
-        this.clientSideMap.push({
+        let callback1 = this.id;
+        this.clientSideMap[callback1] = {
             func: callback,
-            id: this.id
+            id: callback1
             
-        })
+        };
+        let callback2 = this.id;
+        if (onerror){
+        this.id++;
+         callback2 = this.id;
+        this.clientSideMap[callback2] = {
+            func: onerror,
+            id: callback2
+        }
+        }
         this.send({
-            type: "push",
+            type: "asyncPush",
             args: parameters,
             callback: callback.toString(),
-            id: this.id,
+            id: callback1,
+            error: callback2,
+            // onerror: onerror.toString(),
             runCallbackWithValue: runCallbackWithValue,
             func: func.toString()
+        })
+    }
+    pushv3(func: (prevVal, ...args: any[])=>any, runCallbackWithValue:boolean, ...parameters: any[]): Promise<any>
+    {
+        return new Promise((resolve, reject)=>{
+            this.pushv2(func, resolve, runCallbackWithValue, reject);
         })
     }
     /**
@@ -110,12 +134,15 @@ class WorkerQueue {
     terminate() {
         this.worker.terminate();
     }
-    private handleMessage(dat: ClientSideMatchDescriptor) {
+    private handleMessage(dat: ClientSideMessage) {
         if (dat.type === "callbackFunc"){
             if (dat.id){
-                // console.debug("Calling callback function id: "+ dat.id);
-                this.clientSideMap.shift().func(dat.extra);
+                console.log("Calling callback function id: "+ dat.id);
+                this.clientSideMap[dat.id].func(dat.extra);
             }
+        } else if (dat.type === "finishedFlush") {
+            console.log("Finished flushing, deallocating functions");
+            this.clientSideMap = [];
         }
     }
     /**
